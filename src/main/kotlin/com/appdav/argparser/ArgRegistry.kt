@@ -1,10 +1,10 @@
 package com.appdav.argparser
 
-import com.appdav.argparser.argument.ArgumentBase
+import com.appdav.argparser.argument.ArgumentBaseInternal
 
 
-abstract class ArgRegistry private constructor(private val list: MutableList<ArgumentBase<*>>) :
-    List<ArgumentBase<*>> by list {
+abstract class ArgRegistry private constructor(private val list: MutableList<ArgumentBaseInternal<*>>) :
+    List<ArgumentBaseInternal<*>> by list {
 
     constructor() : this(mutableListOf())
 
@@ -17,12 +17,12 @@ abstract class ArgRegistry private constructor(private val list: MutableList<Arg
         return subcommand
     }
 
-    fun <E, T : ArgumentBase<E>> registerArgument(argument: T): T {
+    fun <E, T : ArgumentBaseInternal<E>> registerArgument(argument: T): T {
         list += argument
         return argument
     }
 
-    fun unregisterArgument(argument: ArgumentBase<*>) {
+    fun unregisterArgument(argument: ArgumentBaseInternal<*>) {
         list -= argument
     }
 

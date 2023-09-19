@@ -5,6 +5,9 @@ import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
 
 
+/**
+ * Internal implementation of OptionsProvider
+ */
 internal object OptionsProviderImpl : OptionsProvider {
     context(ArgRegistry)
     override fun <T : Any> required(

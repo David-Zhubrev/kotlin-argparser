@@ -1,8 +1,8 @@
 package com.appdav.argparser.argument.positional
 
-import com.appdav.argparser.argument.ArgumentBase
+import com.appdav.argparser.argument.ArgumentBaseInternal
 
-abstract class NullablePositional<T : Any> : ArgumentBase<T>() {
+abstract class NullablePositional<T : Any> : ArgumentBaseInternal<T>() {
 
     open val position = nextPosition()
 
