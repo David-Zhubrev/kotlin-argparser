@@ -6,18 +6,38 @@ import com.appdav.argparser.argument.positional.NullablePositional
 
 
 class ArgParser<T : ArgRegistry>(
-    private val registry: T,
+    private val argRegistry: T,
 ) {
+
+    private fun acquireCurrentSubcommand(subcommands: List<Subcommand>, args: List<String>): Subcommand? {
+        if (args.isEmpty()) return null
+        return subcommands.find { it.name == args.first() }
+    }
 
     fun parse(
         args: Array<String>,
         ignoreUnknownOptions: Boolean = false,
+        useDefaultSubcommandIfNone: Boolean = true,
     ) {
-
-        val flags = registry.filterIsInstance<Flag>()
-        val options = registry.filterIsInstance<NullableOption<*>>()
-        val positionals = registry.filterIsInstance<NullablePositional<*>>().sortedBy { it.position }
         val mutableArgs = args.toMutableList()
+
+        val subcommands = argRegistry.subcommands
+        var currentRegistry: ArgRegistry = argRegistry
+        if (subcommands.isNotEmpty()) {
+            val currentSubcommand = acquireCurrentSubcommand(subcommands, mutableArgs)
+            if (currentSubcommand == null && !useDefaultSubcommandIfNone) {
+                throw IllegalStateException("No subcommand found")
+            }
+            if (currentSubcommand != null) {
+                currentRegistry = currentSubcommand
+                mutableArgs.removeFirst()
+                argRegistry.setActiveSubcommand(currentSubcommand)
+            }
+        }
+
+        val flags = currentRegistry.filterIsInstance<Flag>()
+        val options = currentRegistry.filterIsInstance<NullableOption<*>>()
+        val positionals = currentRegistry.filterIsInstance<NullablePositional<*>>().sortedBy { it.position }
 
         parseFlags(flags, mutableArgs, ignoreUnknownOptions)
         parseOptions(options, mutableArgs, ignoreUnknownOptions)
@@ -25,7 +45,7 @@ class ArgParser<T : ArgRegistry>(
             checkForUnknownOptionsAndFlags(mutableArgs)
         }
         parsePositionals(positionals, mutableArgs, ignoreUnknownOptions)
-        validateAll()
+        validateAll(currentRegistry)
     }
 
 
@@ -41,12 +61,17 @@ class ArgParser<T : ArgRegistry>(
         }
     }
 
-    fun parse(args: Array<String>, onParse: T.() -> Unit) {
-        parse(args)
-        onParse(registry)
+    fun parse(
+        args: Array<String>,
+        ignoreUnknownOptions: Boolean = false,
+        useDefaultSubcommandIfNone: Boolean = true,
+        onParse: T.() -> Unit,
+    ) {
+        parse(args, ignoreUnknownOptions, useDefaultSubcommandIfNone)
+        onParse(argRegistry)
     }
 
-    private fun validateAll() {
+    private fun validateAll(registry: ArgRegistry) {
         for (arg in registry) {
             if (!arg.isParsed) continue
             else {

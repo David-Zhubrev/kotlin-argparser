@@ -1,6 +1,6 @@
 package com.appdav.argparser.argument
 
-import com.appdav.argparser.ValueConverter
+import com.appdav.argparser.converter.ValueConverter
 import kotlin.reflect.KProperty
 
 typealias Validator<T> = (value: T?) -> Boolean

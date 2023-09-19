@@ -1,4 +1,4 @@
-package com.appdav.argparser
+package com.appdav.argparser.converter
 
 fun interface ValueConverter<T> {
 

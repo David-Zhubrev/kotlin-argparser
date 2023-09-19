@@ -1,7 +1,7 @@
 package com.appdav.argparser.argument.options
 
 import com.appdav.argparser.ArgRegistry
-import com.appdav.argparser.ValueConverter
+import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
 
 

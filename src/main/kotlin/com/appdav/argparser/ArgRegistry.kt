@@ -26,5 +26,12 @@ abstract class ArgRegistry private constructor(private val list: MutableList<Arg
         list -= argument
     }
 
+    var activeSubcommand: Subcommand? = null
+    private set
+
+    fun setActiveSubcommand(currentSubcommand: Subcommand) {
+        activeSubcommand = currentSubcommand
+    }
+
 
 }

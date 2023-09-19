@@ -1,10 +1,11 @@
 package com.appdav.argparser.argument.flags
 
 import com.appdav.argparser.ArgRegistry
-import com.appdav.argparser.BooleanConverter
-import com.appdav.argparser.ValueConverter
+import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.ArgumentBase
 import com.appdav.argparser.argument.Validator
+import com.appdav.argparser.converter.FlagConverter
+import com.appdav.argparser.converter.DefaultConverters
 import java.util.*
 import kotlin.reflect.KProperty
 
@@ -12,7 +13,7 @@ import kotlin.reflect.KProperty
 //TODO: reserve help flag and throw an exception if it is used
 abstract class Flag : ArgumentBase<Boolean>() {
 
-    override val converter: ValueConverter<Boolean> = BooleanConverter //TODO: replace with separate flag converter
+    override val converter: ValueConverter<Boolean> = DefaultConverters.FlagConverter //TODO: replace with separate flag converter
 
     final override val value: Boolean
         get() = super.value ?: defaultValue
