@@ -1,12 +1,11 @@
 package com.appdav.argparser.argument.flags
 
 import com.appdav.argparser.ArgRegistry
-import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.ArgumentBaseInternal
 import com.appdav.argparser.argument.Validator
-import com.appdav.argparser.converter.FlagConverter
 import com.appdav.argparser.converter.DefaultConverters
-import java.util.*
+import com.appdav.argparser.converter.FlagConverter
+import com.appdav.argparser.converter.ValueConverter
 import kotlin.reflect.KProperty
 
 
@@ -25,7 +24,7 @@ abstract class Flag : ArgumentBaseInternal<Boolean>() {
     final override val value: Boolean
         get() = super.value ?: defaultValue
 
-    final override fun getValue(thisRef: Any, kProperty: KProperty<*>): Boolean {
+    final override fun getValue(thisRef: Any?, kProperty: KProperty<*>): Boolean {
         return value
     }
 
@@ -57,9 +56,8 @@ abstract class Flag : ArgumentBaseInternal<Boolean>() {
 
 fun ArgRegistry.flag(
     token: String,
+    name: String,
     additionalTokens: List<String> = emptyList(),
-    name: String = token.removePrefix("--").removePrefix("-").replace("-", " ")
-        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
     description: String = name,
     defaultValue: Boolean = false
 ): Flag {

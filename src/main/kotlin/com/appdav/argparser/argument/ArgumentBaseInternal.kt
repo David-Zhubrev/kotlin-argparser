@@ -20,7 +20,7 @@ abstract class ArgumentBaseInternal<T : Any> {
     /**
      * Value container for `this` argument, where parsed value will be put after the parsing process.
      * Note that if accessed BEFORE calling ArgParser.parse() it can return null, defaultValue(if available) or throw an NonInitializedValueAccessException
-     * @see NonInitializedValueException
+     * @see com.appdav.argparser.exceptions.NonInitializedValueException
      */
     open val value: T?
         get() = mValue
@@ -29,7 +29,7 @@ abstract class ArgumentBaseInternal<T : Any> {
      * Delegate function for returning `this` value using "by" syntax
      * @see value
      */
-    open operator fun getValue(thisRef: Any, kProperty: KProperty<*>): T? = value
+    open operator fun getValue(thisRef: Any?, kProperty: KProperty<*>): T? = value
 
     /**
      * Name of `this` argument
@@ -57,7 +57,7 @@ abstract class ArgumentBaseInternal<T : Any> {
 
     /**
      * Denotes `this` argument as required, which makes ArgParser throw an RequiredArgumentMissingException if `this` argument is missing in passed arguments.
-     * @see RequiredArgumentMissingException
+     * @see com.appdav.argparser.exceptions.RequiredArgumentMissingException
      */
     internal open val required: Boolean = false
 

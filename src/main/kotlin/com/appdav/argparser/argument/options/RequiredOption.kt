@@ -1,7 +1,6 @@
 package com.appdav.argparser.argument.options
 
 import com.appdav.argparser.exceptions.NonInitializedValueException
-import com.appdav.argparser.exceptions.RequiredArgumentMissingException
 import kotlin.reflect.KProperty
 
 /**
@@ -12,11 +11,12 @@ abstract class RequiredOption<T : Any> : NullableOption<T>() {
 
     /**
      * Value container which will return parsed value or throw an exception if `this` argument has not been parsed
+     * @see NonInitializedValueException
      */
     final override val value: T
         get() = super.value ?: throw NonInitializedValueException(this)
 
-    final override fun getValue(thisRef: Any, kProperty: KProperty<*>): T {
+    final override fun getValue(thisRef: Any?, kProperty: KProperty<*>): T {
         return value
     }
 

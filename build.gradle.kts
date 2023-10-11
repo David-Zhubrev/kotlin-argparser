@@ -1,9 +1,38 @@
+import java.util.Properties
+
 plugins {
     kotlin("jvm") version "1.9.10"
+    `maven-publish`
 }
 
 group = "com.appdav"
-version = "1.0-SNAPSHOT"
+version = "0.1.2-SNAPSHOT"
+
+fun repoProperty(name: String): String {
+    return with(Properties()) {
+        load(file("repo.properties").inputStream())
+        get(name) as String
+    }
+}
+
+publishing {
+    publications.create("main", MavenPublication::class.java) {
+        repositories {
+            maven(repoProperty("url")){
+                credentials{
+                    username = repoProperty("username")
+                    password = repoProperty("password")
+                }
+            }
+            artifact("$buildDir\\libs\\${project.name}-$version.jar")
+            artifact("$buildDir\\libs\\${project.name}-$version-sources.jar"){
+                classifier = "sources"
+            }
+        }
+
+
+    }
+}
 
 repositories {
     mavenCentral()
@@ -17,14 +46,14 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.compileKotlin{
-    compilerOptions{
+tasks.compileKotlin {
+    compilerOptions {
         freeCompilerArgs.add("-Xcontext-receivers")
     }
 }
 
-tasks.compileTestKotlin{
-    compilerOptions{
+tasks.compileTestKotlin {
+    compilerOptions {
         freeCompilerArgs.add("-Xcontext-receivers")
     }
 }

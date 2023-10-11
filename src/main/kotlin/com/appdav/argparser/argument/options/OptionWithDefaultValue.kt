@@ -20,7 +20,7 @@ abstract class OptionWithDefaultValue<T : Any> : NullableOption<T>() {
         get() = super.value ?: defaultValue
 
 
-    final override fun getValue(thisRef: Any, kProperty: KProperty<*>): T {
+    final override fun getValue(thisRef: Any?, kProperty: KProperty<*>): T {
         return value
     }
 

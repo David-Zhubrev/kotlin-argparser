@@ -4,6 +4,10 @@ import com.appdav.argparser.ArgRegistry
 import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
 
+/**
+ * Internal implementation of PositionalsProvider
+ * @see PositionalsProvider
+ */
 internal object PositionalsProviderImpl : PositionalsProvider {
 
     context(ArgRegistry)

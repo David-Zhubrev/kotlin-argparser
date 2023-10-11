@@ -2,6 +2,9 @@ package com.appdav.argparser.exceptions
 
 import com.appdav.argparser.argument.ArgumentBaseInternal
 
-class RequiredArgumentMissingException(argument: ArgumentBaseInternal<*>): IllegalStateException(
-    "Required argument is not present"
+/**
+ * Thrown when required argument is not parsed because command-line input lacks the specified argument
+ */
+class RequiredArgumentMissingException(argument: ArgumentBaseInternal<*>) : IllegalStateException(
+    "Required argument ${argument.name} is not found in command-line input"
 )
