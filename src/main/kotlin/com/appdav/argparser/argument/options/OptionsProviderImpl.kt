@@ -1,6 +1,6 @@
 package com.appdav.argparser.argument.options
 
-import com.appdav.argparser.ArgRegistry
+import com.appdav.argparser.registries.RegistryBase
 import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
 
@@ -9,7 +9,7 @@ import com.appdav.argparser.argument.Validator
  * Internal implementation of OptionsProvider
  */
 internal object OptionsProviderImpl : OptionsProvider {
-    context(ArgRegistry)
+    context(RegistryBase)
     override fun <T : Any> required(
         token: String,
         converter: ValueConverter<T>,
@@ -30,7 +30,7 @@ internal object OptionsProviderImpl : OptionsProvider {
     }
 
 
-    context(ArgRegistry)
+    context(RegistryBase)
     override fun <T : Any> nullable(
         token: String,
         converter: ValueConverter<T>,
@@ -51,7 +51,7 @@ internal object OptionsProviderImpl : OptionsProvider {
         return arg
     }
 
-    context(ArgRegistry)
+    context(RegistryBase)
     override fun <T : Any> withDefaultValue(
         token: String,
         converter: ValueConverter<T>,

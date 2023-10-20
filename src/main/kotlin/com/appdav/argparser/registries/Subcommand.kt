@@ -1,4 +1,4 @@
-package com.appdav.argparser
+package com.appdav.argparser.registries
 
 import java.util.*
 
@@ -8,7 +8,7 @@ import java.util.*
  * mode.
  * Subcommand is basically inherits ArgRegistry, which means it is a collection of arguments and a set of methods for a quick registration of arguments
  * @constructor name - name of `this` Subcommand, which is used to call the specified Subcommand from the cli. The first argument from the command-line denotes the Subcommand
- * @see ArgRegistry
+ * @see RegistryBase
  *
  */
 abstract class Subcommand(
@@ -17,4 +17,4 @@ abstract class Subcommand(
         .replace("-", " ")
         .trim()
         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
-) : ArgRegistry()
+) : RegistryBase()

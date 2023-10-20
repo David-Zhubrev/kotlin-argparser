@@ -1,24 +1,27 @@
 package com.appdav.argparser
 
+import com.appdav.argparser.argument.ArgumentBaseInternal
+import com.appdav.argparser.argument.TokenizedArgument
 import com.appdav.argparser.argument.flags.Flag
 import com.appdav.argparser.argument.options.NullableOption
 import com.appdav.argparser.argument.positional.NullablePositional
-import com.appdav.argparser.exceptions.NoSubcommandFoundException
-import com.appdav.argparser.exceptions.TooManyPositionalArgumentsException
-import com.appdav.argparser.exceptions.UnknownTokenException
+import com.appdav.argparser.exceptions.*
+import com.appdav.argparser.registries.RegistryBase
+import com.appdav.argparser.registries.MutuallyExclusiveGroup
+import com.appdav.argparser.registries.Subcommand
 import kotlin.jvm.Throws
 
 
 /**
  * Argument parser that handles the parsing process
  */
-class ArgParser<T : ArgRegistry>(
+class ArgParser<T : RegistryBase>(
     private val appName: String,
     private val argRegistry: T,
-    private val helpArguments: List<String> = listOf("help", "-h", "--help")
+    private val helpArguments: List<String> = listOf("help", "-h", "--help"),
 ) {
 
-     /**
+    /**
      * Checks if some of the registered subcommand is called
      * @param subcommands list of registered subcommands
      * @param args command-line arguments
@@ -30,7 +33,7 @@ class ArgParser<T : ArgRegistry>(
         return subcommands.find { it.name == args.first() }
     }
 
-    private fun String.isHelpCommand(): Boolean{
+    private fun String.isHelpCommand(): Boolean {
         return this in helpArguments
     }
 
@@ -51,18 +54,19 @@ class ArgParser<T : ArgRegistry>(
         ignoreUnknownOptions: Boolean = false,
         useDefaultSubcommandIfNone: Boolean = true,
     ): ParseResult {
+
         val helpMessageCreator = HelpMessageCreator(appName, argRegistry)
         if (args.isEmpty()) {
             return ParseResult.EmptyArgs(helpMessageCreator.createMessageForNoArgs())
         }
-        val mutableArgs = args.toMutableList()
 
+        val mutableArgs = args.toMutableList()
         val subcommands = argRegistry.subcommands
-        var currentRegistry: ArgRegistry = argRegistry
+        var currentRegistry: RegistryBase = argRegistry
         if (subcommands.isNotEmpty()) {
             val currentSubcommand = acquireCurrentSubcommand(subcommands, mutableArgs)
             if (currentSubcommand == null && !useDefaultSubcommandIfNone) {
-                return if (mutableArgs.isNotEmpty() && mutableArgs.first().isHelpCommand()){
+                return if (mutableArgs.isNotEmpty() && mutableArgs.first().isHelpCommand()) {
                     ParseResult.HelpCommand(helpMessageCreator.createDefaultHelpMessage(false))
                 } else {
                     ParseResult.Error(NoSubcommandFoundException(mutableArgs.first()))
@@ -74,17 +78,24 @@ class ArgParser<T : ArgRegistry>(
                 argRegistry.setActiveSubcommand(currentSubcommand)
             }
         }
+//        if (currentRegistry.activeSubcommand.subcommands.isNotEmpty()){
+//            parse(mutableArgs, ignoreUnknownOptions, useDefaultSubcommandIfNone)
+//        }
 
         if (mutableArgs.size > 0) {
             val next = mutableArgs.first()
             if (next.isHelpCommand()) {
-                return if (currentRegistry is Subcommand){
+                return if (currentRegistry is Subcommand) {
                     ParseResult.HelpCommand(helpMessageCreator.createSubcommandHelpMessage(currentRegistry))
                 } else {
                     ParseResult.HelpCommand(helpMessageCreator.createDefaultHelpMessage(useDefaultSubcommandIfNone))
                 }
             }
         }
+
+        val mutuallyExclusive = currentRegistry.mutuallyExclusiveGroups
+        mutuallyExclusive.forEach { parseExclusiveGroup(it, mutableArgs)?.let { error -> return error } }
+        //TODO: add grouped args impl
 
         val flags = currentRegistry.flags()
         val options = currentRegistry.options()
@@ -98,6 +109,42 @@ class ArgParser<T : ArgRegistry>(
         parsePositionals(positionals, mutableArgs, ignoreUnknownOptions)?.let { error -> return error }
         validateAll(currentRegistry)?.let { error -> return error }
         return ParseResult.Success
+    }
+
+
+    private fun parseExclusiveGroup(
+        mutuallyExclusiveGroup: MutuallyExclusiveGroup,
+        mutableArgs: MutableList<String>,
+    ): ParseResult.Error? {
+        var firstParsed: Pair<ArgumentBaseInternal<*>, String>? = null
+        for (arg in mutuallyExclusiveGroup) {
+            when (arg) {
+                is TokenizedArgument -> {
+                    val token = mutableArgs.find { it in arg.allTokens() }
+                    if (token != null) {
+                        if (firstParsed != null) {
+                            return ParseResult.Error(MultipleExclusiveArgsException(firstParsed.second, token))
+                        }
+                        try {
+                            arg.parseInput(token)
+                            arg.validate()
+                            firstParsed = arg to token
+                            mutableArgs.remove(token)
+                        } catch (e: ValueConversionException) {
+                            return ParseResult.Error(e)
+                        }
+                    }
+                }
+
+                else -> {
+                    ParseResult.Error(java.lang.IllegalStateException("TODO")) //TODO: make
+                }
+            }
+        }
+        if (mutuallyExclusiveGroup.isRequired && firstParsed == null) {
+            return ParseResult.Error(RequiredExclusiveGroupMissingException(mutuallyExclusiveGroup))
+        }
+        return null
     }
 
 
@@ -134,7 +181,7 @@ class ArgParser<T : ArgRegistry>(
     /**
      * Calls the validation function on each of the parsed arguments
      */
-    private fun validateAll(registry: ArgRegistry): ParseResult.Error? {
+    private fun validateAll(registry: RegistryBase): ParseResult.Error? {
         for (arg in registry) {
             if (!arg.isParsed) continue
             else {

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.appdav"
-version = "0.1.2-SNAPSHOT"
+version = "0.1.3-SNAPSHOT"
 
 fun repoProperty(name: String): String {
     return with(Properties()) {
@@ -29,8 +29,6 @@ publishing {
                 classifier = "sources"
             }
         }
-
-
     }
 }
 
@@ -52,12 +50,13 @@ tasks.compileKotlin {
     }
 }
 
-tasks.compileTestKotlin {
-    compilerOptions {
+tasks.compileTestKotlin{
+    compilerOptions{
         freeCompilerArgs.add("-Xcontext-receivers")
     }
 }
 
-kotlin {
-    jvmToolchain(11)
-}
+//TODO: change to java 1.8 in order to keep compatibility
+//kotlin {
+//    jvmToolchain(11)
+//}

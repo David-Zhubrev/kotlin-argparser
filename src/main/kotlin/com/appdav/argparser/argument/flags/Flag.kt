@@ -1,7 +1,8 @@
 package com.appdav.argparser.argument.flags
 
-import com.appdav.argparser.ArgRegistry
+import com.appdav.argparser.registries.RegistryBase
 import com.appdav.argparser.argument.ArgumentBaseInternal
+import com.appdav.argparser.argument.TokenizedArgument
 import com.appdav.argparser.argument.Validator
 import com.appdav.argparser.converter.DefaultConverters
 import com.appdav.argparser.converter.FlagConverter
@@ -13,7 +14,7 @@ import kotlin.reflect.KProperty
  * Flag is a simple argument denoted as single hyphen and a single letter. After parsing, it has a boolean value of true, if token is present in commandline arguments and false otherwise.
  * @see ArgumentBaseInternal
  */
-abstract class Flag : ArgumentBaseInternal<Boolean>() {
+abstract class Flag : ArgumentBaseInternal<Boolean>(), TokenizedArgument {
 
     override val converter: ValueConverter<Boolean> = DefaultConverters.FlagConverter
 
@@ -31,12 +32,12 @@ abstract class Flag : ArgumentBaseInternal<Boolean>() {
     /**
      * Token associated with `this` flag
      */
-    abstract val token: String
+    abstract override val token: String
 
     /**
      * Additional tokens associated with `this` flag.
      */
-    open val additionalTokens: List<String> = emptyList()
+    override val additionalTokens: List<String> = emptyList()
 
     /**
      * Default value that is returned by value if `this` flag has not been initialized
@@ -47,14 +48,14 @@ abstract class Flag : ArgumentBaseInternal<Boolean>() {
      * All tokens associated with `this` flag
      * @return list of all tokens associated with `this` flag
      */
-    internal fun allTokens(): List<String> = additionalTokens + token
+    final override fun allTokens(): List<String> = additionalTokens + token
 
     final override val required: Boolean = false
     final override val validator: Validator<Boolean> = { true }
 }
 
 
-fun ArgRegistry.flag(
+fun RegistryBase.flag(
     token: String,
     name: String,
     additionalTokens: List<String> = emptyList(),

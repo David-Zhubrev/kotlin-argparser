@@ -1,12 +1,12 @@
 package com.appdav.argparser.argument.options
 
-import com.appdav.argparser.ArgRegistry
+import com.appdav.argparser.registries.RegistryBase
 import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
 import java.util.*
 
 
-val ArgRegistry.Options: OptionsProvider
+val RegistryBase.Options: OptionsProvider
     get() = OptionsProviderImpl
 
 /**
@@ -24,11 +24,11 @@ interface OptionsProvider {
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see RequiredOption
-     * @see ArgRegistry
+     * @see RegistryBase
      * @see Validator
      * @see ValueConverter
      */
-    context(ArgRegistry)
+    context(RegistryBase)
     fun <T : Any> required(
         token: String,
         converter: ValueConverter<T>,
@@ -50,11 +50,11 @@ interface OptionsProvider {
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see NullableOption
-     * @see ArgRegistry
+     * @see RegistryBase
      * @see Validator
      * @see ValueConverter
      */
-    context(ArgRegistry)
+    context(RegistryBase)
     fun <T : Any> nullable(
         token: String,
         converter: ValueConverter<T>,
@@ -77,11 +77,11 @@ interface OptionsProvider {
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see OptionWithDefaultValue
-     * @see ArgRegistry
+     * @see RegistryBase
      * @see Validator
      * @see ValueConverter
      */
-    context(ArgRegistry)
+    context(RegistryBase)
     fun <T : Any> withDefaultValue(
         token: String,
         converter: ValueConverter<T>,

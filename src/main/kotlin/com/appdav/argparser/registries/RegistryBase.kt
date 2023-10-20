@@ -1,4 +1,4 @@
-package com.appdav.argparser
+package com.appdav.argparser.registries
 
 import com.appdav.argparser.argument.ArgumentBaseInternal
 import com.appdav.argparser.argument.flags.Flag
@@ -13,10 +13,17 @@ import com.appdav.argparser.argument.positional.NullablePositional
  * @see ArgumentBaseInternal
  * @see Subcommand
  */
-abstract class ArgRegistry private constructor(private val list: MutableList<ArgumentBaseInternal<*>>) :
+abstract class RegistryBase private constructor(private val list: MutableList<ArgumentBaseInternal<*>>) :
     List<ArgumentBaseInternal<*>> by list {
 
     constructor() : this(mutableListOf())
+
+    val mutuallyExclusiveGroups: List<MutuallyExclusiveGroup>
+        get() = mMutuallyExclusiveGroup
+
+    private val mMutuallyExclusiveGroup = mutableListOf<MutuallyExclusiveGroup>()
+    val subcommands: List<Subcommand>
+        get() = mSubcommands
 
     /**
      * Private mutable list of subcommands registered within `this` registry
@@ -34,11 +41,6 @@ abstract class ArgRegistry private constructor(private val list: MutableList<Arg
     internal fun positionals(): List<NullablePositional<*>> =
         filterIsInstance<NullablePositional<*>>().sortedBy { it.position }
 
-    /**
-     * List of registered subcommands
-     * @see Subcommand
-     */
-    val subcommands: List<Subcommand> get() = mSubcommands
 
     /**
      * Adds subcommand into `this` registry and returns it
@@ -46,7 +48,7 @@ abstract class ArgRegistry private constructor(private val list: MutableList<Arg
      * @return registered instance of Subcommand
      * @see Subcommand
      */
-    fun <T : Subcommand> addSubcommand(subcommand: T): T {
+    protected open fun <T : Subcommand> addSubcommand(subcommand: T): T {
         mSubcommands.add(subcommand)
         return subcommand
     }
@@ -57,7 +59,7 @@ abstract class ArgRegistry private constructor(private val list: MutableList<Arg
      * @param argument instance of argument to register
      * @return provided argument
      */
-    fun <E, T : ArgumentBaseInternal<E>> registerArgument(argument: T): T {
+    internal open fun <E, T : ArgumentBaseInternal<E>> registerArgument(argument: T): T {
         list += argument
         return argument
     }
@@ -74,7 +76,7 @@ abstract class ArgRegistry private constructor(private val list: MutableList<Arg
      * Returns active subcommand after parsing, null if no subcommand is found or if you access it BEFORE parsing
      */
     var activeSubcommand: Subcommand? = null
-    private set
+        private set
 
     /**
      * Sets active subcommand

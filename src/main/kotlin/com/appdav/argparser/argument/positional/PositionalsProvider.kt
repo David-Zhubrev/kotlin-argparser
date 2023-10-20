@@ -1,13 +1,13 @@
 package com.appdav.argparser.argument.positional
 
-import com.appdav.argparser.ArgRegistry
+import com.appdav.argparser.registries.RegistryBase
 import com.appdav.argparser.argument.Validator
 import com.appdav.argparser.converter.ValueConverter
 
 /**
  * @see PositionalsProvider
  */
-val ArgRegistry.Positionals: PositionalsProvider
+val RegistryBase.Positionals: PositionalsProvider
     get() = PositionalsProviderImpl
 
 /**
@@ -25,11 +25,11 @@ interface PositionalsProvider {
      * @return newly created and registered RequiredOption
      * @see NullablePositional
      * @see NullablePositional.position
-     * @see ArgRegistry
+     * @see RegistryBase
      * @see Validator
      * @see ValueConverter
      */
-    context(ArgRegistry)
+    context(RegistryBase)
     fun <T : Any> nullable(
         name: String,
         converter: ValueConverter<T>,
@@ -48,11 +48,11 @@ interface PositionalsProvider {
      * @return newly created and registered RequiredOption
      * @see RequiredPositional
      * @see RequiredPositional.position
-     * @see ArgRegistry
+     * @see RegistryBase
      * @see Validator
      * @see ValueConverter
      */
-    context(ArgRegistry)
+    context(RegistryBase)
     fun <T : Any> required(
         name: String,
         converter: ValueConverter<T>,
@@ -71,11 +71,11 @@ interface PositionalsProvider {
      * @return newly created and registered RequiredOption
      * @see PositionalWithDefaultValue
      * @see PositionalWithDefaultValue.position
-     * @see ArgRegistry
+     * @see RegistryBase
      * @see Validator
      * @see ValueConverter
      */
-    context(ArgRegistry)
+    context(RegistryBase)
     fun <T : Any> withDefaultValue(
         name: String,
         converter: ValueConverter<T>,

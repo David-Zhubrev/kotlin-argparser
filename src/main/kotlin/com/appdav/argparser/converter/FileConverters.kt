@@ -42,7 +42,8 @@ val DefaultConverters.FileConverter: ValueConverter<File>
 val DefaultConverters.PathConverter: ValueConverter<Path>
     get() = ValueConverter {
         try {
-            Path.of(URI.create(it))
+            File(it).toPath()
+//            Path.of(URI.create(it))
         } catch (e: Exception) {
             throw ValueConversionException(it, Path::class, e.message)
         }
@@ -63,7 +64,8 @@ fun DefaultConverters.PathConverter(
 ) = ValueConverter {
     val result: Path
     try {
-        result = Path.of(URI.create(it))
+        result = File(it).toPath()
+//        result = Path.of(URI.create(it))
     } catch (e: Exception) {
         throw ValueConversionException(it, Path::class, e.message)
     }
@@ -94,7 +96,9 @@ fun DefaultConverters.FileConverter(
 
     val result: File
     try {
+//        result = Path.of(URI.create(it))
         result = File(it)
+
     } catch (e: Exception) {
         throw ValueConversionException(it, File::class, e.message)
     }
