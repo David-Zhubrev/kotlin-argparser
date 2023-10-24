@@ -2,12 +2,16 @@ package com.appdav.argparser.argument.positional
 
 import com.appdav.argparser.registries.RegistryBase
 import com.appdav.argparser.argument.Validator
+import com.appdav.argparser.argument.ArgumentProviderDsl
 import com.appdav.argparser.converter.ValueConverter
+import com.appdav.argparser.registries.PositionalRegistryScope
+
 
 /**
  * @see PositionalsProvider
  */
-val RegistryBase.Positionals: PositionalsProvider
+@ArgumentProviderDsl
+val PositionalRegistryScope.Positionals: PositionalsProvider
     get() = PositionalsProviderImpl
 
 /**
@@ -29,7 +33,7 @@ interface PositionalsProvider {
      * @see Validator
      * @see ValueConverter
      */
-    context(RegistryBase)
+    context(PositionalRegistryScope)
     fun <T : Any> nullable(
         name: String,
         converter: ValueConverter<T>,
@@ -52,7 +56,7 @@ interface PositionalsProvider {
      * @see Validator
      * @see ValueConverter
      */
-    context(RegistryBase)
+    context(PositionalRegistryScope)
     fun <T : Any> required(
         name: String,
         converter: ValueConverter<T>,
@@ -75,7 +79,7 @@ interface PositionalsProvider {
      * @see Validator
      * @see ValueConverter
      */
-    context(RegistryBase)
+    context(PositionalRegistryScope)
     fun <T : Any> withDefaultValue(
         name: String,
         converter: ValueConverter<T>,

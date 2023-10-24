@@ -1,5 +1,6 @@
 package com.appdav.argparser.argument.positional
 
+import com.appdav.argparser.exceptions.NonInitializedValueException
 import kotlin.reflect.KProperty
 
 /**
@@ -11,11 +12,13 @@ abstract class RequiredPositional<T : Any> : NullablePositional<T>() {
 
     /**
      * Value container, which returns the parsed value or throws NonInitializedValueException if accessed BEFORE parsing
+     * @throws NonInitializedValueException
      * @see com.appdav.argparser.exceptions.NonInitializedValueException
      */
     final override val value: T
+        @Throws(NonInitializedValueException::class)
         get() = super.value
-            ?: throw IllegalStateException("Trying to access value of argument which has not been parsed")
+            ?: throw NonInitializedValueException(this)
 
     final override fun getValue(thisRef: Any?, kProperty: KProperty<*>): T {
         return value

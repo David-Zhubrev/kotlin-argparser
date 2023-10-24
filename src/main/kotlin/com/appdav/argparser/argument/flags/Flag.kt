@@ -1,12 +1,13 @@
 package com.appdav.argparser.argument.flags
 
-import com.appdav.argparser.registries.RegistryBase
+import com.appdav.argparser.argument.ArgumentProviderDsl
 import com.appdav.argparser.argument.ArgumentBaseInternal
 import com.appdav.argparser.argument.TokenizedArgument
 import com.appdav.argparser.argument.Validator
 import com.appdav.argparser.converter.DefaultConverters
 import com.appdav.argparser.converter.FlagConverter
 import com.appdav.argparser.converter.ValueConverter
+import com.appdav.argparser.registries.FlagRegistryScope
 import kotlin.reflect.KProperty
 
 
@@ -55,7 +56,8 @@ abstract class Flag : ArgumentBaseInternal<Boolean>(), TokenizedArgument {
 }
 
 
-fun RegistryBase.flag(
+@ArgumentProviderDsl
+fun FlagRegistryScope.flag(
     token: String,
     name: String,
     additionalTokens: List<String> = emptyList(),
@@ -69,6 +71,6 @@ fun RegistryBase.flag(
         override val defaultValue: Boolean = defaultValue
         override val description: String = description
     }
-    registerArgument(flag)
+    registerFlag(flag)
     return flag
 }

@@ -1,15 +1,15 @@
 package com.appdav.argparser.argument.options
 
-import com.appdav.argparser.registries.RegistryBase
 import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
+import com.appdav.argparser.registries.OptionRegistryScope
 
 
 /**
  * Internal implementation of OptionsProvider
  */
 internal object OptionsProviderImpl : OptionsProvider {
-    context(RegistryBase)
+    context(OptionRegistryScope)
     override fun <T : Any> required(
         token: String,
         converter: ValueConverter<T>,
@@ -25,12 +25,12 @@ internal object OptionsProviderImpl : OptionsProvider {
             override val description: String = description
             override val validator: (T?) -> Boolean = validator
         }
-        registerArgument(arg)
+        registerOption(arg)
         return arg
     }
 
 
-    context(RegistryBase)
+    context(OptionRegistryScope)
     override fun <T : Any> nullable(
         token: String,
         converter: ValueConverter<T>,
@@ -47,11 +47,11 @@ internal object OptionsProviderImpl : OptionsProvider {
             override val description: String = description
             override val validator: Validator<T> = validator
         }
-        registerArgument(arg)
+        registerOption(arg)
         return arg
     }
 
-    context(RegistryBase)
+    context(OptionRegistryScope)
     override fun <T : Any> withDefaultValue(
         token: String,
         converter: ValueConverter<T>,
@@ -60,6 +60,7 @@ internal object OptionsProviderImpl : OptionsProvider {
         additionalTokens: List<String>,
         description: String,
         validator: Validator<T>,
+        defaultValueToStringConverter: (T) -> String
     ): OptionWithDefaultValue<T> {
         val arg = object : OptionWithDefaultValue<T>() {
             override val converter: ValueConverter<T> = converter
@@ -69,8 +70,11 @@ internal object OptionsProviderImpl : OptionsProvider {
             override val name: String = name
             override val description: String = description
             override val validator: Validator<T> = validator
+            override fun createDefaultValueHelpString(defaultValue: T): String {
+                return defaultValueToStringConverter(defaultValue)
+            }
         }
-        registerArgument(arg)
+        registerOption(arg)
         return arg
     }
 

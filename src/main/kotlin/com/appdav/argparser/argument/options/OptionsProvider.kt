@@ -3,10 +3,13 @@ package com.appdav.argparser.argument.options
 import com.appdav.argparser.registries.RegistryBase
 import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
+import com.appdav.argparser.argument.ArgumentProviderDsl
+import com.appdav.argparser.registries.OptionRegistryScope
 import java.util.*
 
 
-val RegistryBase.Options: OptionsProvider
+@ArgumentProviderDsl
+val OptionRegistryScope.Options: OptionsProvider
     get() = OptionsProviderImpl
 
 /**
@@ -28,7 +31,7 @@ interface OptionsProvider {
      * @see Validator
      * @see ValueConverter
      */
-    context(RegistryBase)
+    context(OptionRegistryScope)
     fun <T : Any> required(
         token: String,
         converter: ValueConverter<T>,
@@ -54,7 +57,7 @@ interface OptionsProvider {
      * @see Validator
      * @see ValueConverter
      */
-    context(RegistryBase)
+    context(OptionRegistryScope)
     fun <T : Any> nullable(
         token: String,
         converter: ValueConverter<T>,
@@ -81,7 +84,7 @@ interface OptionsProvider {
      * @see Validator
      * @see ValueConverter
      */
-    context(RegistryBase)
+    context(OptionRegistryScope)
     fun <T : Any> withDefaultValue(
         token: String,
         converter: ValueConverter<T>,
@@ -91,6 +94,7 @@ interface OptionsProvider {
         additionalTokens: List<String> = emptyList(),
         description: String = name,
         validator: Validator<T> = { true },
+        defaultValueToStringConverter: (T) -> String = {it.toString()}
     ): OptionWithDefaultValue<T>
 
 }

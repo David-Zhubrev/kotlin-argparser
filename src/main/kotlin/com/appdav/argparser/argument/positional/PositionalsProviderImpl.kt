@@ -1,8 +1,8 @@
 package com.appdav.argparser.argument.positional
 
-import com.appdav.argparser.registries.RegistryBase
-import com.appdav.argparser.converter.ValueConverter
 import com.appdav.argparser.argument.Validator
+import com.appdav.argparser.converter.ValueConverter
+import com.appdav.argparser.registries.PositionalRegistryScope
 
 /**
  * Internal implementation of PositionalsProvider
@@ -10,7 +10,7 @@ import com.appdav.argparser.argument.Validator
  */
 internal object PositionalsProviderImpl : PositionalsProvider {
 
-    context(RegistryBase)
+    context(PositionalRegistryScope)
     override fun <T : Any> nullable(
         name: String,
         converter: ValueConverter<T>,
@@ -26,11 +26,11 @@ internal object PositionalsProviderImpl : PositionalsProvider {
             override val description: String = description
             override val validator: Validator<T> = validator
         }
-        registerArgument(arg)
+        registerPositional(arg)
         return arg
     }
 
-    context(RegistryBase)
+    context(PositionalRegistryScope)
     override fun <T : Any> required(
         name: String,
         converter: ValueConverter<T>,
@@ -48,11 +48,11 @@ internal object PositionalsProviderImpl : PositionalsProvider {
             override val description: String = description
             override val validator: Validator<T> = validator
         }
-        registerArgument(arg)
+        registerPositional(arg)
         return arg
     }
 
-    context(RegistryBase)
+    context(PositionalRegistryScope)
     override fun <T : Any> withDefaultValue(
         name: String,
         converter: ValueConverter<T>,
@@ -72,7 +72,7 @@ internal object PositionalsProviderImpl : PositionalsProvider {
             override val description: String = description
             override val validator: Validator<T> = validator
         }
-        registerArgument(arg)
+        registerPositional(arg)
         return arg
     }
 

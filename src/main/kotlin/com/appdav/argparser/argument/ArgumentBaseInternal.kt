@@ -1,6 +1,7 @@
 package com.appdav.argparser.argument
 
 import com.appdav.argparser.converter.ValueConverter
+import com.appdav.argparser.exceptions.ValueConversionException
 import kotlin.reflect.KProperty
 
 /**
@@ -75,6 +76,7 @@ abstract class ArgumentBaseInternal<T : Any> {
     /**
      * Called by parser in order to convert string input into `this` argument's value type.
      */
+
     internal fun parseInput(input: String) {
         mValue = converter.convert(input)
         isParsed = true
@@ -85,5 +87,13 @@ abstract class ArgumentBaseInternal<T : Any> {
      */
     internal fun validate(): Boolean {
         return validator(mValue)
+    }
+
+    internal fun reset() {
+        this.mValue = null
+    }
+
+    override fun toString(): String {
+        return value.toString()
     }
 }

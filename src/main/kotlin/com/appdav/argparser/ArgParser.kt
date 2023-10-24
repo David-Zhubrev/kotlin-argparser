@@ -1,25 +1,25 @@
 package com.appdav.argparser
 
 import com.appdav.argparser.argument.ArgumentBaseInternal
-import com.appdav.argparser.argument.TokenizedArgument
 import com.appdav.argparser.argument.flags.Flag
 import com.appdav.argparser.argument.options.NullableOption
 import com.appdav.argparser.argument.positional.NullablePositional
 import com.appdav.argparser.exceptions.*
-import com.appdav.argparser.registries.RegistryBase
-import com.appdav.argparser.registries.MutuallyExclusiveGroup
-import com.appdav.argparser.registries.Subcommand
-import kotlin.jvm.Throws
+import com.appdav.argparser.registries.*
 
 
 /**
  * Argument parser that handles the parsing process
  */
-class ArgParser<T : RegistryBase>(
+class ArgParser<T : ArgRegistry>(
     private val appName: String,
     private val argRegistry: T,
     private val helpArguments: List<String> = listOf("help", "-h", "--help"),
 ) {
+
+    init {
+        if (helpArguments.isEmpty()) throw IllegalArgumentException("No help arguments provided. Please provide at least one help argument for the ArgParser instance")
+    }
 
     /**
      * Checks if some of the registered subcommand is called
@@ -37,6 +37,8 @@ class ArgParser<T : RegistryBase>(
         return this in helpArguments
     }
 
+    private lateinit var initialArguments: Array<String>
+
     /**
      * Parses the registered arguments and subcommands. Firstly, it tries to figure out if any of the subcommands is called.
      * After that it parses the arguments in the following order: flags, options and then the positionals. For each type of arguments it checks if some of the required arguments
@@ -52,62 +54,119 @@ class ArgParser<T : RegistryBase>(
     fun parse(
         args: Array<String>,
         ignoreUnknownOptions: Boolean = false,
-        useDefaultSubcommandIfNone: Boolean = true,
     ): ParseResult {
-
-        val helpMessageCreator = HelpMessageCreator(appName, argRegistry)
+        initialArguments = args
+//        val helpMessageCreator = HelpMessageCreator(appName, argRegistry)
         if (args.isEmpty()) {
-            return ParseResult.EmptyArgs(helpMessageCreator.createMessageForNoArgs())
+            return ParseResult.EmptyArgs(HelpMessageCreator2.emptyArgsMessage(appName, helpArguments.first()))
+//            return ParseResult.EmptyArgs(helpMessageCreator.emptyArgsMessage())
         }
+        if (args.first() in helpArguments)
+            return ParseResult.HelpCommand(
+                HelpMessageCreator2.createRootHelpMessage(
+                    appName,
+                    helpArguments.first(),
+                    argRegistry
+                )
+            )
+//            return ParseResult.HelpCommand(helpMessageCreator.createRootHelpMessage(argRegistry.useDefaultSubcommandIfNone))
+        return handleSubcommands(
+            argRegistry,
+            args.toMutableList(),
+            ignoreUnknownOptions
+        )
+    }
 
-        val mutableArgs = args.toMutableList()
-        val subcommands = argRegistry.subcommands
-        var currentRegistry: RegistryBase = argRegistry
-        if (subcommands.isNotEmpty()) {
-            val currentSubcommand = acquireCurrentSubcommand(subcommands, mutableArgs)
-            if (currentSubcommand == null && !useDefaultSubcommandIfNone) {
-                return if (mutableArgs.isNotEmpty() && mutableArgs.first().isHelpCommand()) {
-                    ParseResult.HelpCommand(helpMessageCreator.createDefaultHelpMessage(false))
+    private val subcommandsSequence = mutableListOf<Subcommand>()
+
+    private fun handleSubcommands(
+        registry: RegistryBase,
+        mutableArgs: MutableList<String>,
+        ignoreUnknownOptions: Boolean,
+    ): ParseResult {
+        if (mutableArgs.isNotEmpty()) {
+            if (mutableArgs.first() in helpArguments) {
+                return if (subcommandsSequence.isEmpty()) {
+                    //Probably never happens
+                    ParseResult.HelpCommand(
+                        HelpMessageCreator2.createRootHelpMessage(
+                            appName, helpArguments.first(), registry
+                        )
+                    )
                 } else {
-                    ParseResult.Error(NoSubcommandFoundException(mutableArgs.first()))
+                    ParseResult.HelpCommand(
+                        HelpMessageCreator2.createSubcommandSequenceHelpMessage(
+                            appName,
+                            helpArguments.first(),
+                            registry as Subcommand,
+                            subcommandsSequence.dropLast(1)
+                        )
+                    )
                 }
             }
-            if (currentSubcommand != null) {
-                currentRegistry = currentSubcommand
-                mutableArgs.removeFirst()
-                argRegistry.setActiveSubcommand(currentSubcommand)
-            }
         }
-//        if (currentRegistry.activeSubcommand.subcommands.isNotEmpty()){
-//            parse(mutableArgs, ignoreUnknownOptions, useDefaultSubcommandIfNone)
-//        }
 
-        if (mutableArgs.size > 0) {
-            val next = mutableArgs.first()
-            if (next.isHelpCommand()) {
-                return if (currentRegistry is Subcommand) {
-                    ParseResult.HelpCommand(helpMessageCreator.createSubcommandHelpMessage(currentRegistry))
+        //Check if subcommands registered
+        if (registry is SubcommandRegistryScope) {
+            val subcommands = registry.subcommands()
+            if (subcommands.isNotEmpty()) {
+                val workingSubcommand = acquireCurrentSubcommand(subcommands, mutableArgs)
+                if (workingSubcommand == null) {
+                    return if (mutableArgs.isNotEmpty() && mutableArgs.first() in helpArguments) {
+                        ParseResult.HelpCommand(
+                            HelpMessageCreator2.createSubcommandSequenceHelpMessage(
+                                appName,
+                                helpArguments.first(),
+                                subcommands.last(),
+                                subcommandsSequence.dropLast(1)
+                            )
+                        )
+                    } else if (!registry.useDefaultSubcommandIfNone) {
+                        ParseResult.Error(
+                            NoSubcommandChainFoundException(
+                                subcommandsSequence,
+                                mutableArgs.first()
+                            )
+                        )
+                    } else {
+                        parseRegistryArguments(registry, mutableArgs, ignoreUnknownOptions)
+                    }
                 } else {
-                    ParseResult.HelpCommand(helpMessageCreator.createDefaultHelpMessage(useDefaultSubcommandIfNone))
+                    mutableArgs.removeFirst()
+                    subcommandsSequence.add(workingSubcommand)
+                    registry.setActiveSubcommand(workingSubcommand)
+                    return handleSubcommands(workingSubcommand, mutableArgs, ignoreUnknownOptions)
                 }
             }
         }
+        return parseRegistryArguments(registry, mutableArgs, ignoreUnknownOptions)
+    }
 
-        val mutuallyExclusive = currentRegistry.mutuallyExclusiveGroups
-        mutuallyExclusive.forEach { parseExclusiveGroup(it, mutableArgs)?.let { error -> return error } }
+    private fun parseRegistryArguments(
+        registry: RegistryBase,
+        mutableArgs: MutableList<String>,
+        ignoreUnknownOptions: Boolean,
+    ): ParseResult {
+        if (registry is MutuallyExclusiveGroupsRegistryScope) {
+            val mutuallyExclusive = registry.mutuallyExclusiveGroups()
+            mutuallyExclusive.forEach { parseExclusiveGroup(it, mutableArgs)?.let { error -> return error } }
+        }
         //TODO: add grouped args impl
 
-        val flags = currentRegistry.flags()
-        val options = currentRegistry.options()
-        val positionals = currentRegistry.positionals()
-
-        parseFlags(flags, mutableArgs)
-        parseOptions(options, mutableArgs)?.let { error -> return error }
+        if (registry is FlagRegistryScope) {
+            parseFlags(registry.flags(), mutableArgs)?.let { error -> return error }
+        }
+        if (registry is OptionRegistryScope) {
+            parseOptions(registry.options(), mutableArgs)?.let { error -> return error }
+        }
         if (!ignoreUnknownOptions) {
             checkForUnknownOptionsAndFlags(mutableArgs)?.let { error -> return error }
         }
-        parsePositionals(positionals, mutableArgs, ignoreUnknownOptions)?.let { error -> return error }
-        validateAll(currentRegistry)?.let { error -> return error }
+        if (registry is PositionalRegistryScope) {
+            val positionals = registry.positionals()
+            parsePositionals(positionals, mutableArgs, ignoreUnknownOptions)?.let { error -> return error }
+        }
+        validateAll(registry)?.let { error -> return error }
         return ParseResult.Success
     }
 
@@ -117,27 +176,26 @@ class ArgParser<T : RegistryBase>(
         mutableArgs: MutableList<String>,
     ): ParseResult.Error? {
         var firstParsed: Pair<ArgumentBaseInternal<*>, String>? = null
-        for (arg in mutuallyExclusiveGroup) {
-            when (arg) {
-                is TokenizedArgument -> {
-                    val token = mutableArgs.find { it in arg.allTokens() }
-                    if (token != null) {
-                        if (firstParsed != null) {
-                            return ParseResult.Error(MultipleExclusiveArgsException(firstParsed.second, token))
-                        }
-                        try {
-                            arg.parseInput(token)
-                            arg.validate()
-                            firstParsed = arg to token
-                            mutableArgs.remove(token)
-                        } catch (e: ValueConversionException) {
-                            return ParseResult.Error(e)
-                        }
-                    }
-                }
+        for (arg in mutuallyExclusiveGroup.options()) {
 
-                else -> {
-                    ParseResult.Error(java.lang.IllegalStateException("TODO")) //TODO: make
+            val token = mutableArgs.find { it in arg.allTokens() }
+            if (token != null) {
+                if (firstParsed != null) {
+                    return ParseResult.Error(MultipleExclusiveArgsException(firstParsed.second, token))
+                }
+                try {
+                    val valueIndex: Int = mutableArgs.indexOf(token) + 1
+                    if (mutableArgs.lastIndex < valueIndex) {
+                        return ParseResult.Error(NoValueForOptionException(arg))
+                    }
+                    arg.parseInput(mutableArgs[valueIndex])
+                    arg.validate()
+                    mutuallyExclusiveGroup.initializedArgument = arg
+                    firstParsed = arg to token
+                    mutableArgs.removeAt(valueIndex)
+                    mutableArgs.remove(token)
+                } catch (e: ValueConversionException) {
+                    return ParseResult.Error(e)
                 }
             }
         }
@@ -171,10 +229,9 @@ class ArgParser<T : RegistryBase>(
     fun parse(
         args: Array<String>,
         ignoreUnknownOptions: Boolean = false,
-        useDefaultSubcommandIfNone: Boolean = true,
         onParse: T.(result: ParseResult) -> Unit,
     ) {
-        val result = parse(args, ignoreUnknownOptions, useDefaultSubcommandIfNone)
+        val result = parse(args, ignoreUnknownOptions)
         onParse(argRegistry, result)
     }
 
@@ -221,8 +278,11 @@ class ArgParser<T : RegistryBase>(
         outer@ for (positional in positionals) {
             if (iterator.hasNext()) {
                 val next = iterator.next()
-                //TODO: wrap with try-catch
-                positional.parseInput(next)
+                try {
+                    positional.parseInput(next)
+                } catch (e: Exception) {
+                    return ParseResult.Error(e)
+                }
                 continue@outer
             } else {
                 break@outer
@@ -250,21 +310,26 @@ class ArgParser<T : RegistryBase>(
         mutableArgs: MutableList<String>,
     ): ParseResult.Error? {
         outer@ for (option in options) {
-            val allTokens = option.additionalTokens + option.token
-            for (token in allTokens) {
-                val arg = mutableArgs.find { it in token }
-                if (arg != null) {
-                    val value =
-                        mutableArgs.getOrNull(mutableArgs.indexOf(arg) + 1)?.takeIf { !it.startsWith("-") }
-                            ?: ""
+            val allTokens = option.allTokens()
+            val arg = mutableArgs.find { it in allTokens }
+            if (arg != null) {
+                val value =
+                    mutableArgs.getOrNull(mutableArgs.indexOf(arg) + 1)?.takeIf { !it.startsWith("-") }
+                        ?: return ParseResult.Error(NoValueForOptionException(option))
+                try {
                     option.parseInput(value)
-                    mutableArgs.remove(arg)
-                    mutableArgs.remove(value)
-                    continue@outer
+                } catch (e: Exception) {
+                    return ParseResult.Error(e)
                 }
+                mutableArgs.remove(arg)
+                mutableArgs.remove(value)
+                if (mutableArgs.find { it in allTokens } != null) return ParseResult.Error(
+                    ArgumentMultipleOccurrenceException(option.name, option, initialArguments)
+                )
+                continue@outer
             }
-            //TODO: make my own exception
-            if (option.required && !option.isParsed) return ParseResult.Error(IllegalStateException("Couldn't find required option ${option.name}"))
+            if (option.required && !option.isParsed)
+                return ParseResult.Error(RequiredArgumentMissingException(option))
         }
         return null
     }
@@ -277,17 +342,18 @@ class ArgParser<T : RegistryBase>(
     private fun parseFlags(
         flags: List<Flag>,
         mutableArgs: MutableList<String>,
-    ) {
-        outer@ for (flag in flags) {
-            for (token in flag.allTokens()) {
-                val arg = mutableArgs.find { it in token }
-                if (arg != null) {
-                    flag.parseInput("")
-                    mutableArgs.remove(arg)
-                    continue@outer
+    ): ParseResult.Error? {
+        for (flag in flags) {
+            val arg = mutableArgs.find { it in flag.allTokens() }
+            if (arg != null) {
+                flag.parseInput("")
+                mutableArgs.remove(arg)
+                if (mutableArgs.find { it in flag.allTokens() } != null) {
+                    return ParseResult.Error(ArgumentMultipleOccurrenceException(flag.name, flag, initialArguments))
                 }
             }
         }
+        return null
     }
 
 

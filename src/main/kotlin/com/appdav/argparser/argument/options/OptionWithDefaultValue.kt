@@ -1,16 +1,18 @@
 package com.appdav.argparser.argument.options
 
+import com.appdav.argparser.argument.DefaultValueArgument
 import kotlin.reflect.KProperty
 
 /**
  * Option that has default value, which will be returned in case `this` option has not been parsed, which makes `this` non-nullable type
  */
-abstract class OptionWithDefaultValue<T : Any> : NullableOption<T>() {
+abstract class OptionWithDefaultValue<T : Any> : NullableOption<T>(),
+    DefaultValueArgument<T> {
 
     /**
      * Default value of `this` option
      */
-    protected abstract val defaultValue: T
+    abstract override val defaultValue: T
 
 
     /**
@@ -25,5 +27,8 @@ abstract class OptionWithDefaultValue<T : Any> : NullableOption<T>() {
     }
 
     final override val required: Boolean = false
+
+    final override val defaultValueString: String
+        get() = super.defaultValueString
 
 }
