@@ -4,6 +4,17 @@ import com.appdav.argparser.argument.flags.Flag
 import com.appdav.argparser.argument.options.NullableOption
 import com.appdav.argparser.argument.positional.NullablePositional
 
+/**
+ * ArgRegistry is an argument collection that provides DSL for registering arguments, subcommands and mutually exclusive group.
+ * It should be passed into ArgParser instance in order to start argument parsing.
+ * @see com.appdav.argparser.ArgParser
+ * @see RegistryBase
+ * @see OptionRegistryScope
+ * @see PositionalRegistryScope
+ * @see FlagRegistryScope
+ * @see MutuallyExclusiveGroupsRegistryScope
+ * @see SubcommandRegistryScope
+ */
 abstract class ArgRegistry(
     final override val useDefaultSubcommandIfNone: Boolean = false
 ) : RegistryBase(),
@@ -30,7 +41,7 @@ abstract class ArgRegistry(
         registerArgument(option)
 
     override fun <E, T : NullablePositional<E>> registerPositional(positional: T): T =
-        registerPositional(positional)
+        registerArgument(positional)
 
 
     private val mMutuallyExclusiveGroups = mutableListOf<MutuallyExclusiveGroup>()
@@ -38,7 +49,7 @@ abstract class ArgRegistry(
     override fun mutuallyExclusiveGroups(): List<MutuallyExclusiveGroup> =
         mMutuallyExclusiveGroups
 
-    override fun <T : MutuallyExclusiveGroup> addMutuallyExclusiveGroup(mutuallyExclusiveGroup: T): T {
+    override fun <T : MutuallyExclusiveGroup> registerMutuallyExclusiveGroup(mutuallyExclusiveGroup: T): T {
         mMutuallyExclusiveGroups.add(mutuallyExclusiveGroup)
         return mutuallyExclusiveGroup
     }

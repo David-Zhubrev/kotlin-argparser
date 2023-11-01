@@ -1,0 +1,9 @@
+--file-path C:\TEST_FILE.test --required REQUIRED --nullable NULLABLE --default DEFAULT_INPUT -v|SUCCESS|0
+--folder-path C:\TEST_FOLDER --required REQUIRED|SUCCESS|0
+|EMPTY|0
+--required REQUIRED|EXCEPTION|0|RequiredExclusiveGroupMissingException
+--file-path C:\TEST_FILE.test|EXCEPTION|0|RequiredArgumentMissingException
+--file-path C:\TEST_FILE.test --nullable NULLABLE --required|EXCEPTION|0|NoValueForOptionException
+--file-path C:\TEST_FILE.test --nullable NULLABLE --required REQUIRED --default DEFAULT_INPUT --extra EXTRA|EXCEPTION|0|UnknownTokenException
+--nullable NULLABLE --required REQUIRED --default DEFAULT_INPUT|EXCEPTION|0|RequiredExclusiveGroupMissingException
+--folder-path C:\TEST_FOLDER --required REQUIRED arg1 arg2|EXCEPTION|0|TooManyPositionalArgumentsException

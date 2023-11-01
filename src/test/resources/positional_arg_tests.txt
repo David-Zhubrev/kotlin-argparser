@@ -1,0 +1,9 @@
+12 5|SUCCESS|22
+12 5 3|SUCCESS|20
+12 5 3 3|SUCCESS|23
+12 5 3 2 1|EXCEPTION|0|TooManyPositionalArgumentsException
+|EMPTY|0
+12|EXCEPTION|0|RequiredArgumentMissingException
+help|MESSAGE|0
+test1 test2 test3|EXCEPTION|0|ValueConversionException
+12 5 -v|EXCEPTION|0|UnknownTokenException

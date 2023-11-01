@@ -30,7 +30,7 @@ abstract class ArgumentBaseInternal<T : Any> {
      * Delegate function for returning `this` value using "by" syntax
      * @see value
      */
-    open operator fun getValue(thisRef: Any?, kProperty: KProperty<*>): T? = value
+//    open operator fun getValue(thisRef: Any?, kProperty: KProperty<*>): T? = value
 
     /**
      * Name of `this` argument

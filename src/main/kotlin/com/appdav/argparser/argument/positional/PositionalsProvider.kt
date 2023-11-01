@@ -20,16 +20,16 @@ val PositionalRegistryScope.Positionals: PositionalsProvider
 interface PositionalsProvider {
 
     /**
-     * Creates instance of NullablePositional with specified parameters and registers it inside `this` ArgRegistry
+     * Creates instance of NullablePositional with specified parameters and registers it inside `this` PositionalRegistryScope
      * @param name name for created option
      * @param converter ValueConverter that will be used to convert string input into option's value
-     * @param position position used to sort positional arguments within `this` ArgRegistry
+     * @param position position used to sort positional arguments within `this` PositionalRegistryScope
      * @param description description of created option used by help functions etc.
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see NullablePositional
      * @see NullablePositional.position
-     * @see RegistryBase
+     * @see PositionalRegistryScope
      * @see Validator
      * @see ValueConverter
      */
@@ -43,16 +43,16 @@ interface PositionalsProvider {
     ): NullablePositional<T>
 
     /**
-     * Creates instance of RequiredPositional with specified parameters and registers it inside `this` ArgRegistry
+     * Creates instance of RequiredPositional with specified parameters and registers it inside `this` PositionalRegistryScope
      * @param name name for created option
      * @param converter ValueConverter that will be used to convert string input into option's value
-     * @param position position used to sort positional arguments within `this` ArgRegistry
+     * @param position position used to sort positional arguments within `this` PositionalRegistryScope
      * @param description description of created option used by help functions etc.
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see RequiredPositional
      * @see RequiredPositional.position
-     * @see RegistryBase
+     * @see PositionalRegistryScope
      * @see Validator
      * @see ValueConverter
      */
@@ -66,10 +66,10 @@ interface PositionalsProvider {
     ): RequiredPositional<T>
 
     /**
-     * Creates instance of PositionalWithDefaultValue with specified parameters and registers it inside `this` ArgRegistry
+     * Creates instance of PositionalWithDefaultValue with specified parameters and registers it inside `this` PositionalRegistryScope
      * @param name name for created option
      * @param converter ValueConverter that will be used to convert string input into option's value
-     * @param position position used to sort positional arguments within `this` ArgRegistry
+     * @param position position used to sort positional arguments within `this` PositionalRegistryScope
      * @param description description of created option used by help functions etc.
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption

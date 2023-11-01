@@ -7,11 +7,19 @@ import java.util.*
 
 /**
  * Subcommand is a good way to provide multiple modes for your application.
- * It is a convenient way to create a complex cli for multi-mode application. It is a great way to provide separate set of arguments for each
+ * It is a convenient way to create a complex cli for multimodal application. It is a great way to provide separate set of arguments for each
  * mode.
- * Subcommand is basically inherits ArgRegistry, which means it is a collection of arguments and a set of methods for a quick registration of arguments
- * @constructor name - name of `this` Subcommand, which is used to call the specified Subcommand from the cli. The first argument from the command-line denotes the Subcommand
+ * Subcommand provides DSL for registering all types of arguments, mutually exclusive groups and subcommands, meaning that subcommand can be nested.
+ * @constructor
+ * @param name - name of `this` Subcommand, which is used to call the specified Subcommand from the cli. The first argument from the command-line denotes the Subcommand
+ * @param description - description of `this` Subcommand
+ * @param useDefaultSubcommandIfNone - flag that marks that subcommand to use itself as a registry if no nested subcommand (if any registered) are called via the input array. If false and any subcommands are registered, will throw an exception
  * @see RegistryBase
+ * @see OptionRegistryScope
+ * @see FlagRegistryScope
+ * @see PositionalRegistryScope
+ * @see MutuallyExclusiveGroupsRegistryScope
+ * @see SubcommandRegistryScope
  *
  */
 abstract class Subcommand(
@@ -20,7 +28,7 @@ abstract class Subcommand(
         .replace("-", " ")
         .trim()
         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
-    final override val useDefaultSubcommandIfNone: Boolean = false
+    final override val useDefaultSubcommandIfNone: Boolean = false,
 ) : RegistryBase(),
     OptionRegistryScope,
     FlagRegistryScope,
@@ -52,7 +60,7 @@ abstract class Subcommand(
     override fun mutuallyExclusiveGroups(): List<MutuallyExclusiveGroup> =
         mMutuallyExclusiveGroups
 
-    override fun <T : MutuallyExclusiveGroup> addMutuallyExclusiveGroup(mutuallyExclusiveGroup: T): T {
+    override fun <T : MutuallyExclusiveGroup> registerMutuallyExclusiveGroup(mutuallyExclusiveGroup: T): T {
         mMutuallyExclusiveGroups.add(mutuallyExclusiveGroup)
         return mutuallyExclusiveGroup
     }

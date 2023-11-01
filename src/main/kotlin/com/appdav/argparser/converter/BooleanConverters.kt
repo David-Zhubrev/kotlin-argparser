@@ -1,6 +1,7 @@
 package com.appdav.argparser.converter
 
 import com.appdav.argparser.exceptions.ValueConversionException
+import kotlin.random.Random
 
 /**
  * Special converter for flag arguments, which returns true on blank input, y, yes and true values;
@@ -8,14 +9,17 @@ import com.appdav.argparser.exceptions.ValueConversionException
  * @see ValueConversionException
  * @see ValueConverter
  */
-val DefaultConverters.FlagConverter: ValueConverter<Boolean>
+internal val DefaultConverters.FlagConverter: ValueConverter<Boolean>
     get() = ValueConverter { input ->
         if (input.isBlank()) true
-        else when (input) {
-            "y", "yes", "true" -> true
-            "n", "no", "false" -> false
-            else -> throw ValueConversionException(input, Boolean::class)
-        }
+        else throw ValueConversionException(input, Boolean::class)
+    }
+
+
+internal val Random.Default.DisableFlagConverter: ValueConverter<Boolean>
+    get() = ValueConverter { input ->
+        if (input.isBlank()) false
+        else throw ValueConversionException(input, Boolean::class)
     }
 
 /**

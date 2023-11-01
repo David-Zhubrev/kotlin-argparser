@@ -58,12 +58,12 @@ class ArgParser<T : ArgRegistry>(
         initialArguments = args
 //        val helpMessageCreator = HelpMessageCreator(appName, argRegistry)
         if (args.isEmpty()) {
-            return ParseResult.EmptyArgs(HelpMessageCreator2.emptyArgsMessage(appName, helpArguments.first()))
+            return ParseResult.EmptyArgs(HelpMessageCreator.emptyArgsMessage(appName, helpArguments.first()))
 //            return ParseResult.EmptyArgs(helpMessageCreator.emptyArgsMessage())
         }
         if (args.first() in helpArguments)
             return ParseResult.HelpCommand(
-                HelpMessageCreator2.createRootHelpMessage(
+                HelpMessageCreator.createRootHelpMessage(
                     appName,
                     helpArguments.first(),
                     argRegistry
@@ -89,13 +89,13 @@ class ArgParser<T : ArgRegistry>(
                 return if (subcommandsSequence.isEmpty()) {
                     //Probably never happens
                     ParseResult.HelpCommand(
-                        HelpMessageCreator2.createRootHelpMessage(
+                        HelpMessageCreator.createRootHelpMessage(
                             appName, helpArguments.first(), registry
                         )
                     )
                 } else {
                     ParseResult.HelpCommand(
-                        HelpMessageCreator2.createSubcommandSequenceHelpMessage(
+                        HelpMessageCreator.createSubcommandSequenceHelpMessage(
                             appName,
                             helpArguments.first(),
                             registry as Subcommand,
@@ -114,7 +114,7 @@ class ArgParser<T : ArgRegistry>(
                 if (workingSubcommand == null) {
                     return if (mutableArgs.isNotEmpty() && mutableArgs.first() in helpArguments) {
                         ParseResult.HelpCommand(
-                            HelpMessageCreator2.createSubcommandSequenceHelpMessage(
+                            HelpMessageCreator.createSubcommandSequenceHelpMessage(
                                 appName,
                                 helpArguments.first(),
                                 subcommands.last(),
@@ -125,7 +125,7 @@ class ArgParser<T : ArgRegistry>(
                         ParseResult.Error(
                             NoSubcommandChainFoundException(
                                 subcommandsSequence,
-                                mutableArgs.first()
+                                mutableArgs.firstOrNull() ?: ""
                             )
                         )
                     } else {
@@ -176,7 +176,7 @@ class ArgParser<T : ArgRegistry>(
         mutableArgs: MutableList<String>,
     ): ParseResult.Error? {
         var firstParsed: Pair<ArgumentBaseInternal<*>, String>? = null
-        for (arg in mutuallyExclusiveGroup.options()) {
+        for (arg in mutuallyExclusiveGroup.exclusiveArguments()) {
 
             val token = mutableArgs.find { it in arg.allTokens() }
             if (token != null) {
@@ -289,12 +289,7 @@ class ArgParser<T : ArgRegistry>(
             }
         }
         val nonInitialized = positionals.filter { !it.isParsed && it.required }
-        if (nonInitialized.isNotEmpty()) return ParseResult.Error(
-            IllegalStateException(
-                "No value passed for positional parameters: " + nonInitialized.joinToString(
-                    ", "
-                ) { it.name })
-        )
+        if (nonInitialized.isNotEmpty()) return ParseResult.Error(RequiredArgumentMissingException(nonInitialized.first()))
         return null
     }
 

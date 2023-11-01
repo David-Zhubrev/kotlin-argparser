@@ -1,57 +1,137 @@
 package com.appdav.argparser.registries
 
+import com.appdav.argparser.argument.ExclusiveArgument
 import com.appdav.argparser.argument.flags.Flag
-import com.appdav.argparser.argument.options.NullableOption
-import com.appdav.argparser.argument.options.RequiredOption
 import com.appdav.argparser.argument.positional.NullablePositional
 
+/**
+ * Interface that marks a registry that can provide a DSL for registering flags
+ * @see com.appdav.argparser.argument.flags.flag
+ */
 interface FlagRegistryScope {
 
+    /**
+     * Provides registered flags
+     * @return list of registered Flag arguments
+     * @see Flag
+     */
     fun flags(): List<Flag>
 
+    /**
+     * Register provided Flag instance
+     * @param flag Flag instance
+     * @return provided Flag instance (convenience return)
+     */
     fun registerFlag(flag: Flag): Flag
 
 }
 
-
-interface OptionRegistryScope {
-    fun options(): List<NullableOption<*>>
-
-    fun <E, T : NullableOption<E>> registerOption(option: T): T
-
-}
+/**
+ * Interface that marks a registry that can provide a DSL for registering positional arguments
+ * @see com.appdav.argparser.argument.positional.PositionalsProvider
+ * @see com.appdav.argparser.argument.positional.NullablePositional
+ * @see com.appdav.argparser.argument.positional.RequiredPositional
+ * @see com.appdav.argparser.argument.positional.PositionalWithDefaultValue
+ */
 
 interface PositionalRegistryScope {
 
+    /**
+     * Provides registered positional arguments
+     * @return list of registered positional arguments
+     * @see NullablePositional
+     */
     fun positionals(): List<NullablePositional<*>>
 
+    /**
+     * Register provided positional argument and returns it
+     * @param positional Positional argument instance
+     * @return provided positional argument instance
+     */
     fun <E, T : NullablePositional<E>> registerPositional(positional: T): T
+
 }
 
+/**
+ * Interface that marks a registry that can provide a DSL for registering subcommands
+ * @see Subcommand
+ * @see SubcommandRegistryScope.registerSubcommand
+ */
+
 interface SubcommandRegistryScope {
+
+    /**
+     * @return list of registered subcommands
+     */
     fun subcommands(): List<Subcommand>
+
+    /**
+     * Registers an instance of subcommand and returns it
+     * @param subcommand instance
+     * @return provided subcommand instance
+     */
     fun <T : Subcommand> registerSubcommand(subcommand: T): T
 
+    /**
+     * Sets provided subcommand instance as currently active inside `this` registry
+     * @param subcommand active subcommand
+     */
     fun setActiveSubcommand(subcommand: Subcommand)
 
+    /**
+     * Get currently active subcommand. Can be null if no active subcommand found
+     */
     val activeSubcommand: Subcommand?
 
+    /**
+     * When true, uses `this` registry as a default, meaning that if no subcommand found, `this` registry is used.
+     * If false, throws an exception if no subcommand found
+     */
     val useDefaultSubcommandIfNone: Boolean
 
 }
 
-interface MutuallyExclusiveGroupsRegistryScope{
+/**
+ * Interface that marks a registry that can provide a DSL for registering MutuallyExclusiveGroups
+ * @see MutuallyExclusiveGroup
+ * @see MutuallyExclusiveGroupsRegistryScope.registerMutuallyExclusiveGroup
+ */
+interface MutuallyExclusiveGroupsRegistryScope {
+
+    /**
+     * @return list of registered MutuallyExclusiveGroups
+     * @see MutuallyExclusiveGroup
+     */
     fun mutuallyExclusiveGroups(): List<MutuallyExclusiveGroup>
 
-    fun <T: MutuallyExclusiveGroup> addMutuallyExclusiveGroup(mutuallyExclusiveGroup: T): T
-
+    /**
+     * Registers provided MutuallyExclusiveGroup instance and returns it
+     * @param mutuallyExclusiveGroup MutuallyExclusiveGroup instance to register
+     * @return provided MutuallyExclusiveGroup
+     * @see MutuallyExclusiveGroup
+     */
+    fun <T : MutuallyExclusiveGroup> registerMutuallyExclusiveGroup(mutuallyExclusiveGroup: T): T
 
 
 }
 
-interface MutuallyExclusiveGroupScope{
+/**
+ * Interface that marks a MutuallyExclusiveGroup registry that can provide a DSL for registering ExclusiveArguments
+ * @see MutuallyExclusiveGroup
+ * @see ExclusiveArgument
+ */
+interface MutuallyExclusiveGroupScope {
 
-    fun <T: Any> registerOneOf(option: RequiredOption<T>): RequiredOption<T>
-    fun options(): List<RequiredOption<*>>
+    /**
+     * Registers an instance of ExclusiveArgument and returns it
+     * @param exclusiveArgument ExclusiveArgument instance to register
+     * @return provided ExclusiveArgument instance
+     */
+    fun <T : Any> registerExclusive(exclusiveArgument: ExclusiveArgument<T>): ExclusiveArgument<T>
+
+    /**
+     * @return list of registered ExclusiveArgument
+     */
+    fun exclusiveArguments(): List<ExclusiveArgument<*>>
 
 }

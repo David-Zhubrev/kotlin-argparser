@@ -15,8 +15,7 @@ import kotlin.io.path.isRegularFile
 enum class FileConverterCheckType {
     EXISTING_DIR,
     EXISTING_FILE,
-    DIR,
-    FILE
+    NONE
 }
 
 
@@ -65,15 +64,13 @@ fun DefaultConverters.PathConverter(
     val result: Path
     try {
         result = File(it).toPath()
-//        result = Path.of(URI.create(it))
     } catch (e: Exception) {
         throw ValueConversionException(it, Path::class, e.message)
     }
     val check = when (fileConverterCheckType) {
         FileConverterCheckType.EXISTING_DIR -> result.isDirectory() && result.exists()
         FileConverterCheckType.EXISTING_FILE -> result.isRegularFile() && result.exists()
-        FileConverterCheckType.DIR -> result.isDirectory()
-        FileConverterCheckType.FILE -> result.isRegularFile()
+        FileConverterCheckType.NONE -> true
     }
     if (!check) throw ValueConversionException(it, File::class, "File converter check condition is not satisfied")
     if (returnAbsoluteFile) result.toAbsolutePath() else result
@@ -89,24 +86,21 @@ fun DefaultConverters.PathConverter(
  * @see ValueConverter
  */
 fun DefaultConverters.FileConverter(
-    fileConverterCheckType: FileConverterCheckType,
+    fileConverterCheckType: FileConverterCheckType = FileConverterCheckType.NONE,
     returnAbsoluteFile: Boolean = true,
 ) = ValueConverter {
 
 
     val result: File
     try {
-//        result = Path.of(URI.create(it))
         result = File(it)
-
     } catch (e: Exception) {
         throw ValueConversionException(it, File::class, e.message)
     }
     val check = when (fileConverterCheckType) {
         FileConverterCheckType.EXISTING_DIR -> result.isDirectory && result.exists()
         FileConverterCheckType.EXISTING_FILE -> result.isFile && result.exists()
-        FileConverterCheckType.DIR -> result.isDirectory
-        FileConverterCheckType.FILE -> result.isFile
+        FileConverterCheckType.NONE -> true
     }
     if (!check) throw ValueConversionException(it, File::class, "File converter check condition is not satisfied")
     if (returnAbsoluteFile) result.absoluteFile else result

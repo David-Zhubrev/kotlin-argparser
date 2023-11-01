@@ -1,0 +1,32 @@
+|EMPTY|0
+
+add 12 13|SUCCESS|25
+add 12|EXCEPTION|0|RequiredArgumentMissingException
+add 12 13 -d|SUCCESS|50
+add 12 13 -d 15|EXCEPTION|0|TooManyPositionalArgumentsException
+add 12 13 -v|EXCEPTION|0|UnknownTokenException
+
+subtact 12 13|EXCEPTION|0|TooManyPositionalArgumentsException
+subtract 12 13|SUCCESS|-1
+subtract 12 13 -d|SUCCESS|-2
+subtract 12 13 -d 15|EXCEPTION|0|TooManyPositionalArgumentsException
+subtract 12 13 -v|EXCEPTION|0|UnknownTokenException
+
+multily 12 13|EXCEPTION|0|TooManyPositionalArgumentsException
+multiply 2 3|SUCCESS|6
+multiply 2 3 -d|SUCCESS|12
+multiply 2 3 -d 15|EXCEPTION|0|TooManyPositionalArgumentsException
+multiply 2 3 -v|EXCEPTION|0|UnknownTokenException
+
+divie 2 3|EXCEPTION|0|TooManyPositionalArgumentsException
+divide 6 3|SUCCESS|2
+divide 6 3 -d|EXCEPTION|0|UnknownTokenException
+divide 6 3 15|EXCEPTION|0|TooManyPositionalArgumentsException
+
+nested show-message -m MESSAGE|SUCCESS|0
+nested another-message|EXCEPTION|0|NoSubcommandChainFoundException
+nested|EXCEPTION|0|NoSubcommandChainFoundException
+nested show-message -d -m MESSAGE|EXCEPTION|0|UnknownTokenException
+
+12 13|SUCCESS|250
+12 13 -d|EXCEPTION|0|UnknownTokenException

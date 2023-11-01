@@ -13,12 +13,12 @@ val OptionRegistryScope.Options: OptionsProvider
     get() = OptionsProviderImpl
 
 /**
- * Specifies the way that options can be created inside ArgParser instance
+ * Specifies the way that options can be created inside OptionRegistryScope
  */
 interface OptionsProvider {
 
     /**
-     * Creates instance of RequiredOption with specified parameters and registers it inside `this` ArgRegistry
+     * Creates instance of RequiredOption with specified parameters and registers it inside `this` OptionRegistryScope
      * @param token main token of created option
      * @param converter ValueConverter that will be used to convert string input into option's value
      * @param additionalTokens additional tokens associated with created option
@@ -27,7 +27,7 @@ interface OptionsProvider {
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see RequiredOption
-     * @see RegistryBase
+     * @see OptionRegistryScope
      * @see Validator
      * @see ValueConverter
      */
@@ -44,7 +44,7 @@ interface OptionsProvider {
 
 
     /**
-     * Creates instance of NullableOption with specified parameters and registers it inside `this` ArgRegistry
+     * Creates instance of NullableOption with specified parameters and registers it inside `this` OptionRegistryScope
      * @param token main token of created option
      * @param converter ValueConverter that will be used to convert string input into option's value
      * @param additionalTokens additional tokens associated with created option
@@ -53,7 +53,7 @@ interface OptionsProvider {
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see NullableOption
-     * @see RegistryBase
+     * @see OptionRegistryScope
      * @see Validator
      * @see ValueConverter
      */
@@ -70,7 +70,7 @@ interface OptionsProvider {
 
 
     /**
-     * Creates instance of RequiredOption with specified parameters and registers it inside `this` ArgRegistry
+     * Creates instance of RequiredOption with specified parameters and registers it inside `this` OptionRegistryScope
      * @param token main token of created option
      * @param converter ValueConverter that will be used to convert string input into option's value
      * @param defaultValue Default value that will be returned by value container if created option is not parsed
@@ -80,7 +80,7 @@ interface OptionsProvider {
      * @param validator validation function called after parsing
      * @return newly created and registered RequiredOption
      * @see OptionWithDefaultValue
-     * @see RegistryBase
+     * @see OptionRegistryScope
      * @see Validator
      * @see ValueConverter
      */

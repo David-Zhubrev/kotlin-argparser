@@ -1,6 +1,6 @@
 package com.appdav.argparser.exceptions
 
-import com.appdav.argparser.argument.options.NullableOption
+import com.appdav.argparser.argument.ArgumentBaseInternal
 
-class NoValueForOptionException(option: NullableOption<*>) :
+class NoValueForOptionException(option: ArgumentBaseInternal<*>) :
     IllegalArgumentException("No value provided for option: ${option.name}")
