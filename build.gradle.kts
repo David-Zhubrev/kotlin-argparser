@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.appdav"
-version = "0.2.0"
+version = "0.2.1"
 
 fun repoProperty(name: String): String {
     return with(Properties()) {
