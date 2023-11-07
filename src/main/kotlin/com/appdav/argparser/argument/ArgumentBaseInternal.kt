@@ -1,8 +1,6 @@
 package com.appdav.argparser.argument
 
 import com.appdav.argparser.converter.ValueConverter
-import com.appdav.argparser.exceptions.ValueConversionException
-import kotlin.reflect.KProperty
 
 /**
  * Validation function provided for argument in order to validate value after the parsing process.
@@ -60,7 +58,7 @@ abstract class ArgumentBaseInternal<T : Any> {
      * Denotes `this` argument as required, which makes ArgParser throw an RequiredArgumentMissingException if `this` argument is missing in passed arguments.
      * @see com.appdav.argparser.exceptions.RequiredArgumentMissingException
      */
-    protected open val required: Boolean = false
+    open val required: Boolean = false
 
     /**
      * Flag that denotes whether `this` argument has been parsed
