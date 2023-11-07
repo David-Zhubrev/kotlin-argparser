@@ -17,7 +17,7 @@ import kotlin.reflect.KProperty
 abstract class Flag : ArgumentBaseInternal<Boolean>(), TokenizedArgument,
     DelegateArgument<Boolean>, DefaultValueArgument<Boolean> {
 
-    override val converter: ValueConverter<Boolean> = DefaultConverters.FlagConverter
+    final override val converter: ValueConverter<Boolean> = DefaultConverters.FlagConverter
 
     /**
      * Value of this flag. Returns parsed value or defaultValue if it has not been parsed

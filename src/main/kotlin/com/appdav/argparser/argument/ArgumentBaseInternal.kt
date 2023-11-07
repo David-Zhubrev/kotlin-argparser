@@ -41,7 +41,7 @@ abstract class ArgumentBaseInternal<T : Any> {
      * Value converter that is used during parsing process
      * @see ValueConverter
      */
-    internal abstract val converter: ValueConverter<T>
+    protected abstract val converter: ValueConverter<T>
 
     /**
      * Description of `this` argument used by help functions etc. Same as the name by default
@@ -54,18 +54,18 @@ abstract class ArgumentBaseInternal<T : Any> {
      * Validator function that is used to validate value of `this` argument AFTER parsing. Just returns true by default.
      * @see Validator
      */
-    internal open val validator: Validator<T> = { true }
+    protected open val validator: Validator<T> = { true }
 
     /**
      * Denotes `this` argument as required, which makes ArgParser throw an RequiredArgumentMissingException if `this` argument is missing in passed arguments.
      * @see com.appdav.argparser.exceptions.RequiredArgumentMissingException
      */
-    internal open val required: Boolean = false
+    protected open val required: Boolean = false
 
     /**
      * Flag that denotes whether `this` argument has been parsed
      */
-    internal var isParsed: Boolean = false
+    var isParsed: Boolean = false
         private set
 
     /**
