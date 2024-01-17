@@ -41,7 +41,7 @@ object HelpMessageCreator {
                 return sb.toString()
             }
         }
-        sb.append("Usage: $appName\n")
+        sb.append("Usage: $appName")
         val flags = if (registry is FlagRegistryScope)
             registry.flags() else emptyList()
         val options = if (registry is OptionRegistryScope)
@@ -53,8 +53,8 @@ object HelpMessageCreator {
         if (flags.isNotEmpty()) sb.append(" [flags]")
         if (options.isNotEmpty()) sb.append(" [options]")
         if (positionals.isNotEmpty())
-            sb.append(" ${positionals.joinToString(" ") { it.name }}\n")
-        sb.append("List of available arguments:\n")
+            sb.append(" ${positionals.joinToString(" ") { it.name.replace(" ", "-") }}")
+        sb.append("\nList of available arguments:\n")
             .append(createRegistryArgList(registry))
         return sb.toString()
     }
@@ -73,7 +73,7 @@ object HelpMessageCreator {
         if (registry is FlagRegistryScope) {
             val flags = registry.flags()
             if (flags.isNotEmpty()) {
-                sb.append("Flags:\n")
+                sb.append("\nFlags:\n")
                 flags.forEach {
                     sb.append("[")
                         .append(it.allTokens().joinToString(", "))
@@ -85,7 +85,7 @@ object HelpMessageCreator {
         if (registry is OptionRegistryScope) {
             val options = registry.options()
             if (options.isNotEmpty()) {
-                sb.append("Options:\n")
+                sb.append("\nOptions:\n")
                 options.forEach {
                     if (it.required) sb.append("* ")
                     sb.append("${it.allTokens().joinToString(", ", "[", "]")} ${it.name} - ${it.description}")
@@ -100,7 +100,7 @@ object HelpMessageCreator {
             val exclusiveGroups = registry.mutuallyExclusiveGroups()
             if (exclusiveGroups.isNotEmpty()) {
                 for (group in exclusiveGroups) {
-                    sb.append("Mutually exclusive arguments ")
+                    sb.append("\nMutually exclusive arguments ")
                     if (group.isRequired)
                         sb.append("(only 1 from the group):\n")
                     else sb.append("(one or none from the group):\n")
