@@ -1,7 +1,7 @@
 package com.appdav.argparser
 
 import com.appdav.argparser.argument.ArgumentBaseInternal
-import com.appdav.argparser.argument.flags.Flag
+import com.appdav.argparser.argument.flags.FlagBaseInternal
 import com.appdav.argparser.argument.options.NullableOption
 import com.appdav.argparser.argument.positional.NullablePositional
 import com.appdav.argparser.exceptions.*
@@ -47,8 +47,6 @@ class ArgParser<T : ArgRegistry>(
      * @param args command-line arguments array passed into the main function
      * @param ignoreUnknownOptions if true, it ignores any unknown flags and options, which are denoted by unregistered tokens. If false, throws an
      * UnknownTokenException. False by default.
-     * @param useDefaultSubcommandIfNone if true, uses the root arguments of provided ArgRegistry as a default subcommand, if none is present. If False, throws NoSubcommandFoundException, if no subcommand is recognized.
-     * True by default
      */
 
     fun parse(
@@ -56,10 +54,8 @@ class ArgParser<T : ArgRegistry>(
         ignoreUnknownOptions: Boolean = false,
     ): ParseResult {
         initialArguments = args
-//        val helpMessageCreator = HelpMessageCreator(appName, argRegistry)
         if (args.isEmpty()) {
             return ParseResult.EmptyArgs(HelpMessageCreator.emptyArgsMessage(appName, helpArguments.first()))
-//            return ParseResult.EmptyArgs(helpMessageCreator.emptyArgsMessage())
         }
         if (args.first() in helpArguments)
             return ParseResult.HelpCommand(
@@ -69,7 +65,6 @@ class ArgParser<T : ArgRegistry>(
                     argRegistry
                 )
             )
-//            return ParseResult.HelpCommand(helpMessageCreator.createRootHelpMessage(argRegistry.useDefaultSubcommandIfNone))
         return handleSubcommands(
             argRegistry,
             args.toMutableList(),
@@ -335,7 +330,7 @@ class ArgParser<T : ArgRegistry>(
      * @param mutableArgs mutable list of command-line arguments that is passed throughout parsing functions
      */
     private fun parseFlags(
-        flags: List<Flag>,
+        flags: List<FlagBaseInternal>,
         mutableArgs: MutableList<String>,
     ): ParseResult.Error? {
         for (flag in flags) {

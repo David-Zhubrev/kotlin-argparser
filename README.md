@@ -62,7 +62,7 @@ There are a number of ways you can use this framework. For a quick-start you can
 Here, we create an anonymous object that extends `ArgRegistry`.
 Then, we create a few arguments for the command-line. Different registries (which basically is a collection of arguments)
 provides DSL for creating different types of arguments. `ArgRegistry` provides DSL for creating flags, positional arguments,
-options, subcommands and mutually-exclusive groups. More info about argument types
+options, subcommands and mutually-exclusive groups. More info about argument types below.
 
 ### 2. Pass your ArgRegistry instance into ArgParser instance
 
@@ -131,7 +131,7 @@ myapplication 10 2 3
 ```
 This will assign `a1` as 10, `a2` as 2 and `a3` as 3. As you can see, positional arguments are called that way because they depend on position of the provided input arguments.
 There are 3 types of Positional arguments that can be registered via DSL:
-- `Positionals.required` - creates required argument, which is not-nullable and throw an exception if not present in command-line input
+- `Positionals.required` - creates required argument, which is not-nullable. If argument is missing, `ParseResult.Error` is returned by parser 
 - `Positionals.nullable` - creates a nullable argument, which can be null, but does not throw an exception if not present in command-line input
 - `Positionals.withDefaultValue` - creates a non-nullable argument, which will return provided default value if not present in command-line input
 
@@ -158,7 +158,7 @@ It is considered a good practice to follow those rules when creating a token:
 Although, you can use any string (without spaces) when using this framework, it is a bad idea not to follow those general rules, because it may be misleading and hard to understand for the end-user.
 
 There are 3 types of Options:
-- `Options.required` - creates a non-nullable option that is required and an error will be returned as a result if this option is missed
+- `Options.required` - creates a non-nullable option that is required and `ParseResult.Error` is returned as a result if this option is missed
 - `Options.nullable` - creates a nullable option
 - `Options.withDefaultValue` - creates a non-nullable option that will return provided default value if input lacks this option
 
@@ -166,7 +166,8 @@ There are 3 types of Options:
 Flags are simple usually one-letter tokenized arguments that are used as a toggles.
 ```
 val registry = object: ArgRegistry(){
-    val flag by flag("-f", name = "flag")
+    val flag by Flags.flag("-f", name = "flag")
+    val invertedFlag by Flags.invertedFlag("-inv", name = "inverted")
 }
 ```
 All the flags have Boolean type. They have false value if not found in the command-line input and true otherwise
@@ -175,6 +176,13 @@ If your input is:
 myapplication -f
 ```
  your flag will have true value.
+
+InvertedFlags, on the opposite, have true value by default, and become false if found in command-line input
+For instance:
+```
+myapplication -inv
+```
+will make `invertedFlag` false 
  
 ### Subcommands
 Subcommands are a nested registries which have a token. Subcommands are used when your application has complex functionality and provides a multiple modes or behaviours.

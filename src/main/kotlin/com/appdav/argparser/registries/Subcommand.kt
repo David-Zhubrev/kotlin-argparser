@@ -1,6 +1,8 @@
 package com.appdav.argparser.registries
 
 import com.appdav.argparser.argument.flags.Flag
+import com.appdav.argparser.argument.flags.FlagBaseInternal
+import com.appdav.argparser.argument.flags.InvertedFlag
 import com.appdav.argparser.argument.options.NullableOption
 import com.appdav.argparser.argument.positional.NullablePositional
 import java.util.*
@@ -36,8 +38,8 @@ abstract class Subcommand(
     MutuallyExclusiveGroupsRegistryScope,
     SubcommandRegistryScope {
 
-    override fun flags(): List<Flag> =
-        filterIsInstance<Flag>()
+    override fun flags(): List<FlagBaseInternal> =
+        filterIsInstance<FlagBaseInternal>()
 
     override fun options(): List<NullableOption<*>> =
         filterIsInstance<NullableOption<*>>()
@@ -47,6 +49,9 @@ abstract class Subcommand(
 
     override fun registerFlag(flag: Flag): Flag =
         registerArgument(flag)
+
+    override fun registerInvertedFlag(invertedFlag: InvertedFlag): InvertedFlag =
+        registerArgument(invertedFlag)
 
     override fun <E, T : NullableOption<E>> registerOption(option: T): T =
         registerArgument(option)

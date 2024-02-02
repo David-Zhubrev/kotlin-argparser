@@ -2,11 +2,13 @@ package com.appdav.argparser.registries
 
 import com.appdav.argparser.argument.ExclusiveArgument
 import com.appdav.argparser.argument.flags.Flag
+import com.appdav.argparser.argument.flags.FlagBaseInternal
+import com.appdav.argparser.argument.flags.InvertedFlag
 import com.appdav.argparser.argument.positional.NullablePositional
 
 /**
  * Interface that marks a registry that can provide a DSL for registering flags
- * @see com.appdav.argparser.argument.flags.flag
+ * @see com.appdav.argparser.argument.flags.Flag
  */
 interface FlagRegistryScope {
 
@@ -15,14 +17,23 @@ interface FlagRegistryScope {
      * @return list of registered Flag arguments
      * @see Flag
      */
-    fun flags(): List<Flag>
+    fun flags(): List<FlagBaseInternal>
 
     /**
      * Register provided Flag instance
      * @param flag Flag instance
      * @return provided Flag instance (convenience return)
+     * @see Flag
      */
     fun registerFlag(flag: Flag): Flag
+
+    /**
+     * Registers provided InvertedFlag instance
+     * @param invertedFlag InvertedFlag instance
+     * @return provided InvertedFlag instance(convenience return)
+     * @see InvertedFlag
+     */
+    fun registerInvertedFlag(invertedFlag: InvertedFlag): InvertedFlag
 
 }
 

@@ -1,9 +1,11 @@
 import com.appdav.argparser.ArgParser
 import com.appdav.argparser.ParseResult
-import com.appdav.argparser.argument.flags.flag
+import com.appdav.argparser.argument.flags.Flags
 import com.appdav.argparser.argument.options.Options
 import com.appdav.argparser.argument.options.exclusiveArgument
-import com.appdav.argparser.converter.*
+import com.appdav.argparser.converter.DefaultConverters
+import com.appdav.argparser.converter.FileConverter
+import com.appdav.argparser.converter.StringConverter
 import com.appdav.argparser.registries.ArgRegistry
 import com.appdav.argparser.registries.MutuallyExclusiveGroup
 import org.junit.jupiter.api.Test
@@ -43,7 +45,7 @@ class OptionsTest {
                 val nullableOption by Options.nullable("--nullable", DefaultConverters.StringConverter())
                 val required by Options.required("--required", DefaultConverters.StringConverter())
                 val default by Options.withDefaultValue("--default", DefaultConverters.StringConverter(), "DEFAULT_INIT")
-                val verbose by flag("-v", additionalTokens = listOf("--verbose"), name = "Verbose")
+                val verbose by Flags.flag("-v", additionalTokens = listOf("--verbose"), name = "Verbose")
             }
             ArgParser("optiontest", reg).parse(case.input){result ->
                 when(case.outputType){
